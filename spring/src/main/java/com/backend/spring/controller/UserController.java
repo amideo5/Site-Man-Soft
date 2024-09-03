@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -29,6 +30,17 @@ public class UserController {
     public ResponseEntity<?> getUser(@PathVariable String username) throws UserNotFoundException {
         try{
             UserEntity user = userService.getUserByUserName(username);
+            return ResponseEntity.status(HttpStatus.OK).body(user);
+        }
+        catch (UserNotFoundException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping(path = "/getUserById/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) throws UserNotFoundException {
+        try{
+            Optional<UserEntity> user = userService.getUserById(id);
             return ResponseEntity.status(HttpStatus.OK).body(user);
         }
         catch (UserNotFoundException e){

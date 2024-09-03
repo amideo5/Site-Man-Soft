@@ -5,6 +5,7 @@ import com.backend.spring.exceptions.UserNotFoundException;
 import com.backend.spring.models.UserEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -13,4 +14,5 @@ public interface UserService {
     String updateUser(String username, UserEntity user) throws UserNotFoundException;
     List<UserEntity> getUsers();
     String signInUser(UserEntity user);
+    Optional<UserEntity> getUserById(Long id) throws UserNotFoundException;
 }
