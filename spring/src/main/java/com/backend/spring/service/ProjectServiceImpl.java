@@ -14,7 +14,7 @@ import java.util.Optional;
 public class ProjectServiceImpl implements ProjectService{
 
     @Autowired
-    ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
     public ProjectServiceImpl(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
@@ -38,6 +38,7 @@ public class ProjectServiceImpl implements ProjectService{
         projectEntity.setStartDate(project.getStartDate());
         projectEntity.setEndDate(project.getEndDate());
         projectEntity.setStatus(project.getStatus());
+        projectEntity.setBudget(project.getBudget());
         projectRepository.save(projectEntity);
         return "Project Created";
     }
@@ -52,6 +53,7 @@ public class ProjectServiceImpl implements ProjectService{
         projectEntity.setStartDate(project.getStartDate());
         projectEntity.setEndDate(project.getEndDate());
         projectEntity.setStatus(project.getStatus());
+        projectEntity.setBudget(project.getBudget());
         projectRepository.save(projectEntity);
         return "Project Updated";
     }

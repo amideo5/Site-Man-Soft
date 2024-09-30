@@ -14,7 +14,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUsername(user.getUsername());
         userEntity.setUserType(user.getUserType());
         userEntity.setPassword(user.getPassword());
+        userEntity.setEnabled(user.getEnabled());
         userRepository.save(userEntity);
         return "User Created";
     }
@@ -50,6 +51,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUsername(user.getUsername());
         userEntity.setUserType(user.getUserType());
         userEntity.setPassword(user.getPassword());
+        userEntity.setEnabled(user.getEnabled());
         userRepository.save(userEntity);
         return "User Updated";
     }
