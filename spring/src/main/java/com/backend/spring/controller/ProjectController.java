@@ -27,10 +27,10 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.OK).body(projects);
     }
 
-    @GetMapping(path = "/getProject/{projectname}")
-    public ResponseEntity<?> getProject(@PathVariable String projectname) throws ProjectNotFoundException {
+    @GetMapping(path = "/getProject/{projectName}")
+    public ResponseEntity<?> getProject(@PathVariable String projectName) throws ProjectNotFoundException {
         try{
-            ProjectEntity project = projectService.getProjectByProjectName(projectname);
+            ProjectEntity project = projectService.getProjectByProjectName(projectName);
             return ResponseEntity.status(HttpStatus.OK).body(project);
         }
         catch (ProjectNotFoundException e){
@@ -38,8 +38,8 @@ public class ProjectController {
         }
     }
 
-    @GetMapping(path = "/getProjectrById/{id}")
-    public ResponseEntity<?> getProjectrById(@PathVariable Long id) throws ProjectNotFoundException {
+    @GetMapping(path = "/getProjectById/{id}")
+    public ResponseEntity<?> getProjectById(@PathVariable Long id) throws ProjectNotFoundException {
         try{
             Optional<ProjectEntity> project = projectService.getProjectById(id);
             return ResponseEntity.status(HttpStatus.OK).body(project);
@@ -60,10 +60,10 @@ public class ProjectController {
         }
     }
 
-    @PutMapping(path = "/updateProject/{projectname}")
-    public ResponseEntity<?> updateProject(@PathVariable String projectname, @RequestBody ProjectEntity project) throws UserNotFoundException {
+    @PutMapping(path = "/updateProject/{projectName}")
+    public ResponseEntity<?> updateProject(@PathVariable String projectName, @RequestBody ProjectEntity project) throws UserNotFoundException {
         try {
-            String updateProject = projectService.updateProject(projectname, project);
+            String updateProject = projectService.updateProject(projectName, project);
             return ResponseEntity.status(HttpStatus.OK).body(updateProject);
         }
         catch (ProjectNotFoundException e){

@@ -1,7 +1,6 @@
 package com.backend.spring.repository;
 
 import com.backend.spring.models.ProjectEntity;
-import com.backend.spring.models.UserEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
