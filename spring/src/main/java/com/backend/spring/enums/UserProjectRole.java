@@ -6,5 +6,5 @@ public enum UserProjectRole {
     WORKERS,
     CLIENTS,
     SUBCONTRACTORS,
-    SAFETY_INSPECTORS
+    SAFETY_INSPECTOR
 }
