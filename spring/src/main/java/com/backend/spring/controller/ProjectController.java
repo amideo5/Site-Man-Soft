@@ -2,7 +2,6 @@ package com.backend.spring.controller;
 
 import com.backend.spring.exceptions.ProjectAlreadyExistException;
 import com.backend.spring.exceptions.ProjectNotFoundException;
-import com.backend.spring.exceptions.UserNotFoundException;
 import com.backend.spring.models.ProjectEntity;
 import com.backend.spring.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,7 @@ public class ProjectController {
     }
 
     @PutMapping(path = "/updateProject/{projectName}")
-    public ResponseEntity<?> updateProject(@PathVariable String projectName, @RequestBody ProjectEntity project) throws UserNotFoundException {
+    public ResponseEntity<?> updateProject(@PathVariable String projectName, @RequestBody ProjectEntity project) throws ProjectNotFoundException {
         try {
             String updateProject = projectService.updateProject(projectName, project);
             return ResponseEntity.status(HttpStatus.OK).body(updateProject);

@@ -11,7 +11,7 @@ public interface ProjectUserRepository extends CrudRepository<ProjectUserEntity,
 
     List<ProjectUserEntity> findAll();
 
-    ProjectUserEntity findByProjectUserName(String projectUserName);
+//    ProjectUserEntity findByProjectUserName(String projectUserName);
 
     ProjectUserEntity save(ProjectUserEntity projectUserEntity);
 

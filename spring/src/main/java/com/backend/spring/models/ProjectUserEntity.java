@@ -17,12 +17,14 @@ public class ProjectUserEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long userProjectId;
 
+    // Refers to 'id' column in UserEntity, but the foreign key column is named 'user_id' in this table
     @ManyToOne
-    @JoinColumn(name = "id", nullable = false)
-    private UserEntity user;  // Assuming there's a UserEntity class
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private UserEntity user;
 
+    // Refers to 'id' column in ProjectEntity, but the foreign key column is named 'project_id' in this table
     @ManyToOne
-    @JoinColumn(name = "id", nullable = false)
+    @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)
     private ProjectEntity project;
 
     @Enumerated(EnumType.STRING)
