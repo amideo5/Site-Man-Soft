@@ -40,13 +40,8 @@ public class SupportTicketController {
 
     @PostMapping("/createSupportTicket")
     public ResponseEntity<?> createSupportTicket(@RequestBody SupportTicketsEntity supportTicket){
-        try{
             String createdSupportTicketResult = supportTicketsService.createSupportTicket(supportTicket);
             return ResponseEntity.status(HttpStatus.OK).body(createdSupportTicketResult);
-        }
-        catch(SupportTicketAlreadyExistException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
     }
 
     @PutMapping("/updateSupportTicket/{id}")

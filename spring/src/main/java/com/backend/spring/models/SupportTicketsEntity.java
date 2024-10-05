@@ -54,8 +54,5 @@ public class SupportTicketsEntity {
         updatedAt = LocalDateTime.now();
     }
 
-
-
-
 }
 

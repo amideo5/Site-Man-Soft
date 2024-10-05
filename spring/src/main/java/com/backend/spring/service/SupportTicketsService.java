@@ -15,5 +15,5 @@ public interface SupportTicketsService {
 
     public String updateSupportTicketById(Long id, SupportTicketsEntity supportTicket) throws SupportTicketNotFoundException;
 
-    public String createSupportTicket(SupportTicketsEntity supportTicket) throws SupportTicketAlreadyExistException;
+    public String createSupportTicket(SupportTicketsEntity supportTicket);
 }

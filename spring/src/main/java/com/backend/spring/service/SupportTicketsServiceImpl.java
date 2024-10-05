@@ -5,9 +5,13 @@ import com.backend.spring.exceptions.SupportTicketNotFoundException;
 import com.backend.spring.models.SupportTicketsEntity;
 import com.backend.spring.repository.SupportTicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class SupportTicketsServiceImpl implements SupportTicketsService{
 
     @Autowired
@@ -34,11 +38,14 @@ public class SupportTicketsServiceImpl implements SupportTicketsService{
         if(supportTicketFromDB.isPresent()){
             SupportTicketsEntity oldSupportTicket = supportTicketFromDB.get();
 
-            oldSupportTicket.setId(supportTicket.getId());
             oldSupportTicket.setUser(supportTicket.getUser());
             oldSupportTicket.setProject(supportTicket.getProject());
             oldSupportTicket.setDescription(supportTicket.getDescription());
             oldSupportTicket.setStatus(supportTicket.getStatus());
+
+            if (supportTicket.getResolvedAt() != null) {
+                oldSupportTicket.setResolvedAt(LocalDateTime.now());
+            }
 
             supportTicketRepository.save(oldSupportTicket);
             return "Support Ticket Updated";
@@ -49,10 +56,13 @@ public class SupportTicketsServiceImpl implements SupportTicketsService{
     }
 
     @Override
-    public String createSupportTicket(SupportTicketsEntity supportTicket) throws SupportTicketAlreadyExistException {
-        if(supportTicketRepository.findById(supportTicket.getId()) != null){
-            throw new SupportTicketAlreadyExistException(supportTicket.getId());
-        }
+    public String createSupportTicket(SupportTicketsEntity supportTicket) {
+        SupportTicketsEntity newSupportTicketEntity = new SupportTicketsEntity();
+
+        newSupportTicketEntity.setUser(supportTicket.getUser());
+        newSupportTicketEntity.setProject(supportTicket.getProject());
+        newSupportTicketEntity.setDescription(supportTicket.getDescription());
+        newSupportTicketEntity.setStatus(supportTicket.getStatus());
 
         supportTicketRepository.save(supportTicket);
         return "Support Ticket Created";
