@@ -14,12 +14,6 @@ public interface ResourceService {
 
     Optional<ResourceEntity> getResourceByResourceName(String resourceName) throws ResourceNotFoundException;
 
-    Integer getQuantity(Long id) throws ResourceNotFoundException;
-
-    Integer getAvailableQuantity(Long id) throws ResourceNotFoundException;
-
-    Integer getAllocatedToQuantity(Long id) throws ResourceNotFoundException;
-
     String createResource(ResourceEntity resource);
 
     String updateResource(Long id, ResourceEntity resource) throws ResourceNotFoundException;

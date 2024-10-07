@@ -47,5 +47,21 @@ public class ResourceController {
         }
     }
 
+    @PostMapping("/createResource")
+    public ResponseEntity<?> createResource(@RequestBody ResourceEntity resource){
+        String createResourceResult = resourceService.createResource(resource);
+        return ResponseEntity.status(HttpStatus.OK).body(createResourceResult);
+    }
+
+    @PutMapping("/updateResource/{id}")
+    public ResponseEntity<?> updateResource(@PathVariable Long id, @RequestBody ResourceEntity resource){
+        try{
+            String updatedResourceResult = resourceService.updateResource(id, resource);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedResourceResult);
+        }
+        catch(ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 }

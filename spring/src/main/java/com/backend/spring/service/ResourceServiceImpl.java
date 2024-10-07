@@ -19,44 +19,54 @@ public class ResourceServiceImpl implements ResourceService{
         this.resourceRepository = resourceRepository;
     }
 
-
     @Override
     public List<ResourceEntity> getResources() {
-        return null;
+
+        return resourceRepository.findAll();
+
     }
 
     @Override
     public Optional<ResourceEntity> getResourceById(Long id) throws ResourceNotFoundException {
-        return Optional.empty();
+       return resourceRepository.findById(id);
     }
 
     @Override
     public Optional<ResourceEntity> getResourceByResourceName(String resourceName) throws ResourceNotFoundException {
-        return Optional.empty();
-    }
-
-    @Override
-    public Integer getQuantity(Long id) throws ResourceNotFoundException {
-        return null;
-    }
-
-    @Override
-    public Integer getAvailableQuantity(Long id) throws ResourceNotFoundException {
-        return null;
-    }
-
-    @Override
-    public Integer getAllocatedToQuantity(Long id) throws ResourceNotFoundException {
-        return null;
+        return resourceRepository.findByResourceName(resourceName);
     }
 
     @Override
     public String createResource(ResourceEntity resource) {
-        return null;
+
+        ResourceEntity newResource = new ResourceEntity();
+
+        newResource.setResource_name(resource.getResource_name());
+        newResource.setQuantity(resource.getQuantity());
+        newResource.setAvailable_quantity(resource.getAvailable_quantity());
+        newResource.setAllocated_to(resource.getAllocated_to());
+
+        resourceRepository.save(newResource);
+        return "Resource Created";
     }
 
     @Override
     public String updateResource(Long id, ResourceEntity resource) throws ResourceNotFoundException {
-        return null;
+        Optional<ResourceEntity> resourceFromDB = resourceRepository.findById(id);
+
+        if(resourceFromDB.isPresent()){
+            ResourceEntity oldResource  = resourceFromDB.get();
+
+            oldResource.setResource_name(resource.getResource_name());
+            oldResource.setQuantity(resource.getQuantity());
+            oldResource.setAvailable_quantity(resource.getAvailable_quantity());
+            oldResource.setAllocated_to(resource.getAllocated_to());
+
+            resourceRepository.save(oldResource);
+            return "Resource Updated Successfully";
+        }
+        else {
+            throw new ResourceNotFoundException(id);
+        }
     }
 }
