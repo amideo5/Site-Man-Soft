@@ -11,4 +11,5 @@ public interface SupportTicketRepository extends CrudRepository<SupportTicketsEn
 
     List<SupportTicketsEntity> findAll();
 
+    
 }
