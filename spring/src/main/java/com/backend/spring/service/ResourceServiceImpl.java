@@ -41,7 +41,7 @@ public class ResourceServiceImpl implements ResourceService{
 
         ResourceEntity newResource = new ResourceEntity();
 
-        newResource.setResource_name(resource.getResource_name());
+        newResource.setResourceName(resource.getResourceName());
         newResource.setQuantity(resource.getQuantity());
         newResource.setAvailable_quantity(resource.getAvailable_quantity());
         newResource.setAllocated_to(resource.getAllocated_to());
@@ -57,7 +57,7 @@ public class ResourceServiceImpl implements ResourceService{
         if(resourceFromDB.isPresent()){
             ResourceEntity oldResource  = resourceFromDB.get();
 
-            oldResource.setResource_name(resource.getResource_name());
+            oldResource.setResourceName(resource.getResourceName());
             oldResource.setQuantity(resource.getQuantity());
             oldResource.setAvailable_quantity(resource.getAvailable_quantity());
             oldResource.setAllocated_to(resource.getAllocated_to());

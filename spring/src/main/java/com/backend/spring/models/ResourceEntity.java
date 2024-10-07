@@ -16,7 +16,7 @@ public class ResourceEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String resource_name;
+    private String resourceName;
 
     @Column(nullable = false)
     private Integer quantity;
