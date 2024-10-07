@@ -21,7 +21,6 @@ public class ProjectUserEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserEntity user;
 
-    // Refers to 'id' column in ProjectEntity, but the foreign key column is named 'project_id' in this table
     @ManyToOne
     @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)
     private ProjectEntity project;
