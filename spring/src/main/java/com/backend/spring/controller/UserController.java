@@ -1,83 +1,86 @@
 package com.backend.spring.controller;
 
-import com.backend.spring.exceptions.UserAlreadyExistException;
-import com.backend.spring.exceptions.UserNotFoundException;
+import com.backend.spring.dto.LoginRequest;
+import com.backend.spring.dto.LoginResponse;
 import com.backend.spring.models.UserEntity;
 import com.backend.spring.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
+
+import com.backend.spring.security.JwtTokenProvider;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @RestController
-@RequestMapping("/users")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RequestMapping("/api/users")
 public class UserController {
 
+    private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    UserService userService;
-
-    @GetMapping(path = "/getUsers")
-    public ResponseEntity<?> getUsers(){
-        List<UserEntity> users = userService.getUsers();
-        return ResponseEntity.status(HttpStatus.OK).body(users);
+    public UserController(UserService userService,
+                          JwtTokenProvider jwtTokenProvider,
+                          PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping(path = "/getUser/{username}")
-    public ResponseEntity<?> getUser(@PathVariable String username) throws UserNotFoundException {
-        try{
-            UserEntity user = userService.getUserByUserName(username);
-            return ResponseEntity.status(HttpStatus.OK).body(user);
-        }
-        catch (UserNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @PostMapping
+    public ResponseEntity<UserEntity> createUser(@RequestBody UserEntity userEntity, HttpServletRequest request, HttpServletResponse response) {
+        // CSRF token will be checked automatically by Spring Security
+        UserEntity createdUser = userService.createUser(userEntity);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @GetMapping(path = "/getUserById/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) throws UserNotFoundException {
-        try{
-            Optional<UserEntity> user = userService.getUserById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(user);
-        }
-        catch (UserNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @PutMapping("/{userId}")
+    public ResponseEntity<UserEntity> updateUser(@PathVariable Long userId, @RequestBody UserEntity updatedUser, HttpServletRequest request, HttpServletResponse response) {
+        UserEntity updatedUserEntity = userService.updateUser(userId, updatedUser);
+        return new ResponseEntity<>(updatedUserEntity, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/createUser")
-    public ResponseEntity<?> createUser(@RequestBody UserEntity user) throws UserAlreadyExistException {
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserEntity> getUserById(@PathVariable Long userId, HttpServletRequest request, HttpServletResponse response) {
+        Optional<UserEntity> user = userService.getUserById(userId);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @GetMapping("/tenant/{tenantId}")
+    public ResponseEntity<List<UserEntity>> getUsersByTenant(@PathVariable Long tenantId, HttpServletRequest request, HttpServletResponse response) {
+        List<UserEntity> users = userService.getUsersByTenant(tenantId);
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId, HttpServletRequest request, HttpServletResponse response) {
+        userService.deleteUser(userId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
-            String createUser = userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.OK).body(createUser);
-        }catch (UserAlreadyExistException e)
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            LoginResponse loginResponse = userService.login(loginRequest);
+            return ResponseEntity.ok(loginResponse);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            // Optionally log the exception
+            return ResponseEntity.status(401).build();
         }
     }
 
-    @PutMapping(path = "/updateUser/{username}")
-    public ResponseEntity<?> updateUser(@PathVariable String username, @RequestBody UserEntity user) throws UserNotFoundException {
-        try {
-            String updateUser = userService.updateUser(username, user);
-            return ResponseEntity.status(HttpStatus.OK).body(updateUser);
-        }
-        catch (UserNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody UserEntity user){
-        try {
-            String sign = userService.signInUser(user);
-            return ResponseEntity.status(HttpStatus.OK).body(sign);
-        }
-        catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @GetMapping("/get/{username}")
+    public ResponseEntity<UserEntity> getUserByUserName(@PathVariable String username, HttpServletRequest request, HttpServletResponse response) {
+        Optional<UserEntity> user = userService.getUserByUserName(username);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }

@@ -1,0 +1,126 @@
+Task Controller
+
+Base URL: /api/tasks
+
+1. Create a Task
+Endpoint: /api/tasks
+Method: POST
+Description: Creates a new task.
+
+Request Body:
+`json`
+{
+  "id": <Long>,              // (optional) ID of the task
+  "title": <String>,         // Title of the task
+  "description": <String>,   // Detailed description of the task
+  "status": <String>,        // Status of the task (e.g., "Pending", "In Progress", "Completed")
+  "priority": <String>,      // Priority level (e.g., "Low", "Medium", "High")
+  "assignedTo": <String>,    // User assigned to the task
+  "dueDate": <String>,       // (optional) Due date for the task (ISO 8601 format)
+  "createdAt": <String>,     // (optional) Timestamp of creation
+  "updatedAt": <String>      // (optional) Timestamp of last update
+}
+Response:
+Status Code: 201 Created
+Body: Returns the created task.
+`json`
+{
+  "id": <Long>,
+  "title": <String>,
+  "description": <String>,
+  "status": <String>,
+  "priority": <String>,
+  "assignedTo": <String>,
+  "dueDate": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+
+2. Update a Task
+Endpoint: /api/tasks/{taskId}
+Method: PUT
+Description: Updates an existing task.
+
+Path Parameter: taskId (Long): The ID of the task to update.
+Request Body:
+`json`
+{
+  "title": <String>,         // Updated title of the task
+  "description": <String>,   // Updated description of the task
+  "status": <String>,        // Updated status of the task
+  "priority": <String>,      // Updated priority level
+  "assignedTo": <String>,    // Updated user assigned to the task
+  "dueDate": <String>        // Updated due date for the task (ISO 8601 format)
+}
+Response:
+Status Code: 200 OK
+Body: Returns the updated task.
+`json`
+{
+  "id": <Long>,
+  "title": <String>,
+  "description": <String>,
+  "status": <String>,
+  "priority": <String>,
+  "assignedTo": <String>,
+  "dueDate": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+
+3. Get a Task by ID
+Endpoint: /api/tasks/{taskId}
+Method: GET
+Description: Retrieves a specific task by its ID.
+
+Path Parameter: taskId (Long): The ID of the task to retrieve.
+Response:
+Status Code: 200 OK
+Body:
+`json`
+{
+  "id": <Long>,
+  "title": <String>,
+  "description": <String>,
+  "status": <String>,
+  "priority": <String>,
+  "assignedTo": <String>,
+  "dueDate": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+Status Code: 404 Not Found
+Returns no body if the task is not found.
+
+4. Get All Tasks
+Endpoint: /api/tasks
+Method: GET
+Description: Retrieves a list of all tasks.
+
+Response:
+Status Code: 200 OK
+Body: Returns a list of all tasks.
+`json`
+[
+  {
+    "id": <Long>,
+    "title": <String>,
+    "description": <String>,
+    "status": <String>,
+    "priority": <String>,
+    "assignedTo": <String>,
+    "dueDate": <String>,
+    "createdAt": <String>,
+    "updatedAt": <String>
+  },
+  ...
+]
+
+5. Delete a Task
+Endpoint: /api/tasks/{taskId}
+Method: DELETE
+Description: Deletes a specific task by its ID.
+
+Path Parameter: taskId (Long): The ID of the task to delete.
+Response:
+Status Code: 204 No Content

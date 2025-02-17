@@ -1,0 +1,114 @@
+Tenant Controller
+
+Base URL: /api/tenants
+
+1. Create a Tenant
+Endpoint: /api/tenants
+Method: POST
+Description: Creates a new tenant.
+
+Request Body:
+`json`
+{
+  "id": <Long>,              // (optional) ID of the tenant
+  "name": <String>,          // Name of the tenant
+  "email": <String>,         // Email address of the tenant
+  "phone": <String>,         // (optional) Phone number of the tenant
+  "address": <String>,       // (optional) Address of the tenant
+  "createdAt": <String>,     // (optional) Timestamp of creation
+  "updatedAt": <String>      // (optional) Timestamp of last update
+}
+Response:
+Status Code: 201 Created
+Body: Returns the created tenant.
+`json`
+{
+  "id": <Long>,
+  "name": <String>,
+  "email": <String>,
+  "phone": <String>,
+  "address": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+
+2. Update a Tenant
+Endpoint: /api/tenants/{tenantId}
+Method: PUT
+Description: Updates an existing tenant.
+
+Path Parameter: tenantId (Long): The ID of the tenant to update.
+Request Body:
+`json`
+{
+  "name": <String>,          // Updated name of the tenant
+  "email": <String>,         // Updated email of the tenant
+  "phone": <String>,         // Updated phone number
+  "address": <String>        // Updated address
+}
+Response:
+Status Code: 200 OK
+Body: Returns the updated tenant.
+`json`
+{
+  "id": <Long>,
+  "name": <String>,
+  "email": <String>,
+  "phone": <String>,
+  "address": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+
+3. Get a Tenant by ID
+Endpoint: /api/tenants/{tenantId}
+Method: GET
+Description: Retrieves a specific tenant by its ID.
+
+Path Parameter: tenantId (Long): The ID of the tenant to retrieve.
+Response:
+Status Code: 200 OK
+Body:
+`json`
+{
+  "id": <Long>,
+  "name": <String>,
+  "email": <String>,
+  "phone": <String>,
+  "address": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+Status Code: 404 Not Found
+Returns no body if the tenant is not found.
+
+4. Get All Tenants
+Endpoint: /api/tenants
+Method: GET
+Description: Retrieves a list of all tenants.
+
+Response:
+Status Code: 200 OK
+Body: Returns a list of all tenants.
+`json`
+[
+  {
+    "id": <Long>,
+    "name": <String>,
+    "email": <String>,
+    "phone": <String>,
+    "address": <String>,
+    "createdAt": <String>,
+    "updatedAt": <String>
+  },
+  ...
+]
+
+5. Delete a Tenant
+Endpoint: /api/tenants/{tenantId}
+Method: DELETE
+Description: Deletes a specific tenant by its ID.
+
+Path Parameter: tenantId (Long): The ID of the tenant to delete.
+Response:
+Status Code: 204 No Content

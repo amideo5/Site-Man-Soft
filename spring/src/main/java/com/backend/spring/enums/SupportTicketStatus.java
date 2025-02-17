@@ -3,6 +3,8 @@ package com.backend.spring.enums;
 public enum SupportTicketStatus {
 
     OPEN,
-    RESOLVED
+    IN_PROGRESS,
+    RESOLVED,
+    CLOSED
 
 }

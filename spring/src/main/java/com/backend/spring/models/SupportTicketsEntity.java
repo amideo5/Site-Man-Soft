@@ -1,6 +1,5 @@
 package com.backend.spring.models;
 
-
 import com.backend.spring.enums.SupportTicketStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,8 +7,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
+@Setter
 @Entity
 @Table(name = "support_tickets")
 public class SupportTicketsEntity {
@@ -22,7 +21,6 @@ public class SupportTicketsEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserEntity user;
 
-    // Refers to 'id' column in ProjectEntity, but the foreign key column is named 'project_id' in this table
     @ManyToOne
     @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)
     private ProjectEntity project;
@@ -53,6 +51,4 @@ public class SupportTicketsEntity {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 }
-

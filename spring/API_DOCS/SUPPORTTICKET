@@ -1,0 +1,125 @@
+Support Ticket Controller
+
+Base URL: /api/support-tickets
+
+1. Create a Support Ticket
+Endpoint: /api/support-tickets
+Method: POST
+Description: Creates a new support ticket.
+
+Request Body:
+`json'
+{
+  "id": <Long>,            // (optional) ID of the ticket
+  "title": <String>,       // Title of the support ticket
+  "description": <String>, // Detailed description of the issue
+  "status": <String>,      // Status of the ticket (e.g., "Open", "In Progress", "Closed")
+  "priority": <String>,    // Priority level (e.g., "Low", "Medium", "High")
+  "createdBy": <String>,   // User who created the ticket
+  "assignedTo": <String>,  // User assigned to resolve the ticket
+  "createdAt": <String>,   // (optional) Timestamp of creation
+  "updatedAt": <String>    // (optional) Timestamp of last update
+}
+Response:
+Status Code: 201 Created
+Body: Returns the created support ticket.
+`json`
+{
+  "id": <Long>,
+  "title": <String>,
+  "description": <String>,
+  "status": <String>,
+  "priority": <String>,
+  "createdBy": <String>,
+  "assignedTo": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+
+2. Update a Support Ticket
+Endpoint: /api/support-tickets/{ticketId}
+Method: PUT
+Description: Updates an existing support ticket.
+
+Path Parameter: ticketId (Long): The ID of the ticket to update.
+Request Body:
+`json`
+{
+  "title": <String>,       // Updated title of the support ticket
+  "description": <String>, // Updated detailed description
+  "status": <String>,      // Updated status of the ticket
+  "priority": <String>,    // Updated priority level
+  "assignedTo": <String>   // Updated user assigned to resolve the ticket
+}
+Response:
+Status Code: 200 OK
+Body: Returns the updated support ticket.
+`json`
+{
+  "id": <Long>,
+  "title": <String>,
+  "description": <String>,
+  "status": <String>,
+  "priority": <String>,
+  "createdBy": <String>,
+  "assignedTo": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+
+3. Get a Support Ticket by ID
+Endpoint: /api/support-tickets/{ticketId}
+Method: GET
+Description: Retrieves a specific support ticket by its ID.
+
+Path Parameter: ticketId (Long): The ID of the ticket to retrieve.
+Response:
+Status Code: 200 OK
+Body:
+`json`
+{
+  "id": <Long>,
+  "title": <String>,
+  "description": <String>,
+  "status": <String>,
+  "priority": <String>,
+  "createdBy": <String>,
+  "assignedTo": <String>,
+  "createdAt": <String>,
+  "updatedAt": <String>
+}
+Status Code: 404 Not Found
+Returns no body if the ticket is not found.
+
+4. Get All Support Tickets
+Endpoint: /api/support-tickets
+Method: GET
+Description: Retrieves a list of all support tickets.
+
+Response:
+Status Code: 200 OK
+Body: Returns a list of all support tickets.
+`json`
+[
+  {
+    "id": <Long>,
+    "title": <String>,
+    "description": <String>,
+    "status": <String>,
+    "priority": <String>,
+    "createdBy": <String>,
+    "assignedTo": <String>,
+    "createdAt": <String>,
+    "updatedAt": <String>
+  },
+  ...
+]
+
+5. Delete a Support Ticket
+Endpoint: /api/support-tickets/{ticketId}
+Method: DELETE
+Description: Deletes a specific support ticket by its ID.
+
+Path Parameter: ticketId (Long): The ID of the ticket to delete.
+Response:
+Status Code: 204 No Content

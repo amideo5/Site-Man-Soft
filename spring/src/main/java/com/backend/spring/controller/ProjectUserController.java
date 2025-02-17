@@ -1,8 +1,8 @@
 package com.backend.spring.controller;
 
-import com.backend.spring.exceptions.ProjectUserNotFoundException;
 import com.backend.spring.models.ProjectUserEntity;
 import com.backend.spring.service.ProjectUserService;
+import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,46 +12,49 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/projectUser")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/project-users")
 public class ProjectUserController {
 
+    private final ProjectUserService projectUserService;
+
     @Autowired
-    ProjectUserService projectUserService;
-
-    @GetMapping(path = "/getProjectUsers")
-    public ResponseEntity<?> getProjectUsers(){
-        List<ProjectUserEntity> projectUsers = projectUserService.getProjectUsers();
-        return ResponseEntity.status(HttpStatus.OK).body(projectUsers);
+    public ProjectUserController(ProjectUserService projectUserService) {
+        this.projectUserService = projectUserService;
     }
 
-    @GetMapping(path = "/getProjectUserById/{id}")
-    public ResponseEntity<?> getProjectUserById(@PathVariable Long id) {
-        try {
-            Optional<ProjectUserEntity> projectUser = projectUserService.getProjectUserById(id);
-            if (projectUser.isPresent()) {
-                return ResponseEntity.status(HttpStatus.OK).body(projectUser);
-            } else {
-                throw new ProjectUserNotFoundException(id);
-            }
-        } catch (ProjectUserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    @PostMapping
+    public ResponseEntity<ProjectUserEntity> assignUserToProject(@RequestBody ProjectUserEntity projectUserEntity, HttpServletRequest request, HttpServletResponse response) {
+        ProjectUserEntity assignedUser = projectUserService.assignUserToProject(projectUserEntity);
+        return new ResponseEntity<>(assignedUser, HttpStatus.CREATED);
     }
 
-    @PostMapping(path = "/createProjectUser")
-    public ResponseEntity<?> createProjectUser(@RequestBody ProjectUserEntity projectUser) {
-        String response = projectUserService.createProjectUser(projectUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PutMapping("/{userProjectId}")
+    public ResponseEntity<ProjectUserEntity> updateUserProjectRole(@PathVariable Long userProjectId, @RequestBody ProjectUserEntity updatedProjectUser, HttpServletRequest request, HttpServletResponse response) {
+        ProjectUserEntity updatedUser = projectUserService.updateUserProjectRole(userProjectId, updatedProjectUser);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
-    @PutMapping(path = "/updateProjectUser/{id}")
-    public ResponseEntity<?> updateProjectUser(@PathVariable Long id, @RequestBody ProjectUserEntity projectUser) {
-        try {
-            String response = projectUserService.updateProjectUser(id, projectUser);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (ProjectUserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<List<ProjectUserEntity>> getUsersAssignedToProject(@PathVariable Long projectId, HttpServletRequest request, HttpServletResponse response) {
+        List<ProjectUserEntity> projectUsers = projectUserService.getUsersAssignedToProject(projectId);
+        return new ResponseEntity<>(projectUsers, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<ProjectUserEntity>> getProjectsbyUserId(@PathVariable Long userId, HttpServletRequest request, HttpServletResponse response) {
+        List<ProjectUserEntity> usersProject = projectUserService.getProjectsbyUserId(userId);
+        return new ResponseEntity<>(usersProject, HttpStatus.OK);
+    }
+
+    @GetMapping("/{userProjectId}")
+    public ResponseEntity<ProjectUserEntity> getUserProjectById(@PathVariable Long userProjectId, HttpServletRequest request, HttpServletResponse response) {
+        Optional<ProjectUserEntity> projectUser = projectUserService.getUserProjectById(userProjectId);
+        return projectUser.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @DeleteMapping("/{userProjectId}")
+    public ResponseEntity<Void> removeUserFromProject(@PathVariable Long userProjectId, HttpServletRequest request, HttpServletResponse response) {
+        projectUserService.removeUserFromProject(userProjectId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

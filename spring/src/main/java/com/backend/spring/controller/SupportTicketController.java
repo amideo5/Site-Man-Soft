@@ -1,10 +1,8 @@
 package com.backend.spring.controller;
 
-
-import com.backend.spring.exceptions.SupportTicketAlreadyExistException;
-import com.backend.spring.exceptions.SupportTicketNotFoundException;
 import com.backend.spring.models.SupportTicketsEntity;
 import com.backend.spring.service.SupportTicketsService;
+import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,45 +12,43 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/support-tickets")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/support-tickets")
 public class SupportTicketController {
 
+    private final SupportTicketsService supportTicketsService;
+
     @Autowired
-    private SupportTicketsService supportTicketsService;
-
-    @GetMapping("/getSupportTickets")
-    public ResponseEntity<?> getSupportTickets(){
-        List<SupportTicketsEntity> supportTickets = supportTicketsService.getSupportTickets();
-        return ResponseEntity.status(HttpStatus.OK).body(supportTickets);
+    public SupportTicketController(SupportTicketsService supportTicketsService) {
+        this.supportTicketsService = supportTicketsService;
     }
 
-    @GetMapping("/getSupportTicketById/{id}")
-    public ResponseEntity<?> getSupportTicketById(@PathVariable Long id) throws SupportTicketNotFoundException{
-        try{
-            Optional<SupportTicketsEntity> supportTicket = supportTicketsService.getSupportTicketById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(supportTicket);
-        }
-        catch(SupportTicketNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @PostMapping
+    public ResponseEntity<SupportTicketsEntity> createSupportTicket(@RequestBody SupportTicketsEntity supportTicketEntity, HttpServletRequest request, HttpServletResponse response) {
+        SupportTicketsEntity createdTicket = supportTicketsService.createSupportTicket(supportTicketEntity);
+        return new ResponseEntity<>(createdTicket, HttpStatus.CREATED);
     }
 
-    @PostMapping("/createSupportTicket")
-    public ResponseEntity<?> createSupportTicket(@RequestBody SupportTicketsEntity supportTicket){
-            String createdSupportTicketResult = supportTicketsService.createSupportTicket(supportTicket);
-            return ResponseEntity.status(HttpStatus.OK).body(createdSupportTicketResult);
+    @PutMapping("/{ticketId}")
+    public ResponseEntity<SupportTicketsEntity> updateSupportTicket(@PathVariable Long ticketId, @RequestBody SupportTicketsEntity updatedSupportTicket, HttpServletRequest request, HttpServletResponse response) {
+        SupportTicketsEntity updatedTicketEntity = supportTicketsService.updateSupportTicket(ticketId, updatedSupportTicket);
+        return new ResponseEntity<>(updatedTicketEntity, HttpStatus.OK);
     }
 
-    @PutMapping("/updateSupportTicket/{id}")
-    public ResponseEntity<?> updateSupportTicketById(@PathVariable Long id, @RequestBody SupportTicketsEntity supportTicket){
-        try{
-            String updatedSupportTicketResult = supportTicketsService.updateSupportTicketById(id, supportTicket);
-            return ResponseEntity.status(HttpStatus.OK).body(updatedSupportTicketResult);
-        }
-        catch(SupportTicketNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @GetMapping("/{ticketId}")
+    public ResponseEntity<SupportTicketsEntity> getSupportTicketById(@PathVariable Long ticketId, HttpServletRequest request, HttpServletResponse response) {
+        Optional<SupportTicketsEntity> ticket = supportTicketsService.getSupportTicketById(ticketId);
+        return ticket.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    @GetMapping
+    public ResponseEntity<List<SupportTicketsEntity>> getAllSupportTickets(HttpServletRequest request, HttpServletResponse response) {
+        List<SupportTicketsEntity> tickets = supportTicketsService.getAllSupportTickets();
+        return new ResponseEntity<>(tickets, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{ticketId}")
+    public ResponseEntity<Void> deleteSupportTicket(@PathVariable Long ticketId, HttpServletRequest request, HttpServletResponse response) {
+        supportTicketsService.deleteSupportTicket(ticketId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

@@ -1,0 +1,98 @@
+Project User Controller
+
+Base URL: /api/project-users
+
+1. Assign a User to a Project
+Endpoint: /api/project-users
+Method: POST
+Description: Assigns a user to a specific project.
+
+Request Body:
+`json`
+{
+  "id": <Long>,            // (optional) ID of the project-user assignment
+  "projectId": <Long>,     // ID of the project
+  "userId": <Long>,        // ID of the user
+  "role": <String>         // Role of the user in the project
+}
+Response:
+Status Code: 201 Created
+Body: Returns the created project-user assignment.
+`json`
+{
+  "id": <Long>,
+  "projectId": <Long>,
+  "userId": <Long>,
+  "role": <String>
+}
+
+2. Update User Project Role
+Endpoint: /api/project-users/{userProjectId}
+Method: PUT
+Description: Updates the role of a user assigned to a project.
+
+Path Parameter: userProjectId (Long): The ID of the project-user assignment.
+Request Body:
+`json`
+{
+  "projectId": <Long>,     // ID of the project (optional)
+  "userId": <Long>,        // ID of the user (optional)
+  "role": <String>         // Updated role of the user in the project
+}
+Response:
+Status Code: 200 OK
+Body: Returns the updated project-user assignment.
+`json`
+{
+  "id": <Long>,
+  "projectId": <Long>,
+  "userId": <Long>,
+  "role": <String>
+}
+
+3. Get Users Assigned to a Project
+Endpoint: /api/project-users/project/{projectId}
+Method: GET
+Description: Retrieves all users assigned to a specific project.
+
+Path Parameter: projectId (Long): The ID of the project.
+Response:
+Status Code: 200 OK
+Body: Returns a list of users assigned to the project.
+`json`
+[
+  {
+    "id": <Long>,
+    "projectId": <Long>,
+    "userId": <Long>,
+    "role": <String>
+  },
+  ...
+]
+
+4. Get Project-User Assignment by ID
+Endpoint: /api/project-users/{userProjectId}
+Method: GET
+Description: Retrieves details of a specific project-user assignment by its ID.
+
+Path Parameter: userProjectId (Long): The ID of the project-user assignment.
+Response:
+Status Code: 200 OK
+Body:
+`json`
+{
+  "id": <Long>,
+  "projectId": <Long>,
+  "userId": <Long>,
+  "role": <String>
+}
+Status Code: 404 Not Found
+Returns no body if the assignment is not found.
+
+5. Remove a User from a Project
+Endpoint: /api/project-users/{userProjectId}
+Method: DELETE
+Description: Removes a user from a specific project by deleting the project-user assignment.
+
+Path Parameter: userProjectId (Long): The ID of the project-user assignment.
+Response: Status Code: 204 No Content

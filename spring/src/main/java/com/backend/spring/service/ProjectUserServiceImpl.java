@@ -1,6 +1,5 @@
 package com.backend.spring.service;
 
-import com.backend.spring.exceptions.ProjectUserNotFoundException;
 import com.backend.spring.models.ProjectUserEntity;
 import com.backend.spring.repository.ProjectUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,52 +9,50 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProjectUserServiceImpl implements ProjectUserService{
+public class ProjectUserServiceImpl implements ProjectUserService {
 
-    @Autowired
     private final ProjectUserRepository projectUserRepository;
 
+    @Autowired
     public ProjectUserServiceImpl(ProjectUserRepository projectUserRepository) {
         this.projectUserRepository = projectUserRepository;
     }
 
     @Override
-    public String createProjectUser(ProjectUserEntity projectUser) {
-        ProjectUserEntity projectUserEntity = new ProjectUserEntity();
-        projectUserEntity.setUser(projectUser.getUser());
-        projectUserEntity.setProject(projectUser.getProject());
-        projectUserEntity.setRole(projectUser.getRole());
-        projectUserEntity.setAssignedAt(projectUser.getAssignedAt());
-        projectUserRepository.save(projectUserEntity);
-        return "Project User Created";
+    public ProjectUserEntity assignUserToProject(ProjectUserEntity projectUserEntity) {
+        return projectUserRepository.save(projectUserEntity);
     }
 
     @Override
-    public String updateProjectUser(Long id, ProjectUserEntity projectUser) throws ProjectUserNotFoundException {
-        Optional<ProjectUserEntity> projectUserEntityOptional = projectUserRepository.findById(id);
-
-        if (projectUserEntityOptional.isEmpty()) {
-            throw new ProjectUserNotFoundException(id);
+    public ProjectUserEntity updateUserProjectRole(Long userProjectId, ProjectUserEntity updatedProjectUser) {
+        Optional<ProjectUserEntity> existingAssociationOptional = projectUserRepository.findById(userProjectId);
+        if (existingAssociationOptional.isPresent()) {
+            ProjectUserEntity existingAssociation = existingAssociationOptional.get();
+            existingAssociation.setRole(updatedProjectUser.getRole());
+            return projectUserRepository.save(existingAssociation);
+        } else {
+            // Handle the case when the association doesn't exist
+            throw new RuntimeException("User-project association not found for id: " + userProjectId);
         }
-
-        ProjectUserEntity projectUserEntity = projectUserEntityOptional.get();
-        projectUserEntity.setUser(projectUser.getUser());
-        projectUserEntity.setProject(projectUser.getProject());
-        projectUserEntity.setRole(projectUser.getRole());
-        projectUserEntity.setAssignedAt(projectUser.getAssignedAt());
-
-        projectUserRepository.save(projectUserEntity);
-        return "Project User Updated";
-    }
-
-
-    @Override
-    public List<ProjectUserEntity> getProjectUsers() {
-        return projectUserRepository.findAll();
     }
 
     @Override
-    public Optional<ProjectUserEntity> getProjectUserById(Long id) throws ProjectUserNotFoundException {
-        return projectUserRepository.findById(id);
+    public List<ProjectUserEntity> getUsersAssignedToProject(Long projectId) {
+        return projectUserRepository.findByProjectId(projectId);
+    }
+
+    @Override
+    public Optional<ProjectUserEntity> getUserProjectById(Long userProjectId) {
+        return projectUserRepository.findById(userProjectId);
+    }
+
+    @Override
+    public List<ProjectUserEntity> getProjectsbyUserId(Long userId) {
+        return projectUserRepository.findByUserId(userId);
+    }
+
+    @Override
+    public void removeUserFromProject(Long userProjectId) {
+        projectUserRepository.deleteById(userProjectId);
     }
 }

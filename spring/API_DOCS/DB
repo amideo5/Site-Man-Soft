@@ -1,0 +1,122 @@
+Tables and Relationships:
+
+Users
+Columns: id (PK), username, password, role, enabled, tenant_id (FK), created_at, updated_at
+Relationships:
+Many-to-One with Tenants (tenant_id → id).
+
+Tenants
+Columns: id (PK), name, domain, created_at, updated_at
+Relationships:
+One-to-Many with Users (id → tenant_id).
+One-to-Many with Projects (id → tenant_id).
+One-to-Many with Resources (id → tenant_id).
+
+Projects
+Columns: id (PK), name, start_date, end_date, status, budget, tenant_id (FK), created_at, updated_at
+Relationships:
+Many-to-One with Tenants (tenant_id → id).
+One-to-Many with Milestones (id → project_id).
+One-to-Many with SupportTickets (id → project_id).
+One-to-Many with ProjectUserAssociation (id → project_id).
+
+Milestones
+Columns: id (PK), name, due_date, project_id (FK), created_at, updated_at
+Relationships:
+Many-to-One with Projects (project_id → id).
+One-to-Many with Tasks (id → milestone_id).
+
+Tasks
+Columns: id (PK), description, milestone_id (FK), assigned_to_user_id (FK), is_complete, created_at, updated_at
+Relationships:
+Many-to-One with Milestones (milestone_id → id).
+Many-to-One with Users (assigned_to_user_id → id).
+
+Resources
+Columns: id (PK), name, total_quantity, available_quantity, tenant_id (FK), created_at, updated_at
+Relationships:
+Many-to-One with Tenants (tenant_id → id).
+One-to-Many with ResourceAllocations (id → resource_id).
+
+ResourceAllocations
+Columns: id (PK), resource_id (FK), user_id (FK), allocated_quantity, allocated_at, updated_at, return_date
+Relationships:
+Many-to-One with Resources (resource_id → id).
+Many-to-One with Users (user_id → id).
+
+SupportTickets
+Columns: id (PK), user_id (FK), project_id (FK), description, status, created_at, updated_at, resolved_at
+Relationships:
+Many-to-One with Users (user_id → id).
+Many-to-One with Projects (project_id → id).
+
+ProjectUserAssociation
+Columns: user_project_id (PK), user_id (FK), project_id (FK), role, assigned_at, updated_at
+Relationships:
+Many-to-One with Users (user_id → id).
+Many-to-One with Projects (project_id → id).
+
+
+
+ER Diagram Explanation:
+Tenants act as the primary organizational entities.
+Users belong to a Tenant and can be assigned roles within Projects.
+Projects are associated with a Tenant and contain Milestones, SupportTickets, and user assignments via ProjectUserAssociation.
+Milestones break down into Tasks.
+Resources are allocated to Users and belong to Tenants.
+
+
+
+
+
+1. Create Tenants
+Start by creating the tenants, as they serve as the primary organizational entities.
+API: Create Tenant
+Input: { "name": "Tenant1", "domain": "tenant1.com" }
+This populates the tenants table.
+2. Create Users
+Create users and associate them with a tenant.
+API: Create User
+Input: { "username": "user1", "password": "password123", "role": "ADMIN", "enabled": true, "tenant_id": <Tenant ID> }
+This populates the users table.
+3. Create Projects
+Create projects and associate them with a tenant.
+API: Create Project
+Input: { "name": "Project1", "start_date": "2025-01-01T00:00:00", "end_date": "2025-06-01T00:00:00", "status": "ACTIVE", "budget": 50000, "tenant_id": <Tenant ID> }
+This populates the projects table.
+4. Associate Users with Projects
+Assign users to projects with specific roles.
+API: Associate User with Project
+Input: { "user_id": <User ID>, "project_id": <Project ID>, "role": "MANAGER" }
+This populates the user_project_association table.
+5. Create Resources
+Add resources associated with a tenant.
+API: Create Resource
+Input: { "name": "Laptop", "total_quantity": 10, "available_quantity": 10, "tenant_id": <Tenant ID> }
+This populates the resources table.
+6. Allocate Resources to Users
+Allocate resources to users as needed.
+API: Allocate Resource
+Input: { "resource_id": <Resource ID>, "user_id": <User ID>, "allocated_quantity": 2 }
+This populates the resource_allocations table.
+7. Create Milestones
+Add milestones to a project.
+API: Create Milestone
+Input: { "name": "Design Phase", "due_date": "2025-03-01T00:00:00", "project_id": <Project ID> }
+This populates the milestones table.
+8. Create Tasks
+Add tasks to milestones, optionally assigning them to users.
+API: Create Task
+Input: { "description": "Design Homepage", "milestone_id": <Milestone ID>, "assigned_to_user_id": <User ID>, "is_complete": false }
+This populates the tasks table.
+9. Create Support Tickets
+Log support tickets for projects, associated with users.
+API: Create Support Ticket
+Input: { "user_id": <User ID>, "project_id": <Project ID>, "description": "Issue with project setup", "status": "OPEN" }
+This populates the support_tickets table.
+
+Summary of Dependencies:
+Tenants → Users, Projects, Resources.
+Users → Project Assignments, Resource Allocations, Tasks, Support Tickets.
+Projects → Milestones, Support Tickets, User Associations.
+Milestones → Tasks.

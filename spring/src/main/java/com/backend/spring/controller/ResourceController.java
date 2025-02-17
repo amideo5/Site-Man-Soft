@@ -1,67 +1,53 @@
 package com.backend.spring.controller;
 
-
-import com.backend.spring.exceptions.ResourceNotFoundException;
 import com.backend.spring.models.ResourceEntity;
 import com.backend.spring.service.ResourceService;
+import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/resources")
+@RequestMapping("/api/resources")
 public class ResourceController {
 
+    private final ResourceService resourceService;
+
     @Autowired
-    private ResourceService resourceService;
-
-    @GetMapping("/getResources")
-    public ResponseEntity<?> getResources(){
-        List<ResourceEntity> allResources = resourceService.getResources();
-        return ResponseEntity.status(HttpStatus.OK).body(allResources);
+    public ResourceController(ResourceService resourceService) {
+        this.resourceService = resourceService;
     }
 
-    @GetMapping("/getResourceById/{id}")
-    public ResponseEntity<?> getResourceById(@PathVariable Long id){
-        try{
-            Optional<ResourceEntity> resource = resourceService.getResourceById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(resource);
-        }
-        catch (ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @PostMapping
+    public ResponseEntity<ResourceEntity> createResource(@RequestBody ResourceEntity resourceEntity, HttpServletRequest request, HttpServletResponse response) {
+        ResourceEntity createdResource = resourceService.createResource(resourceEntity);
+        return new ResponseEntity<>(createdResource, HttpStatus.CREATED);
     }
 
-    @GetMapping("/getResourceByResourceName/{resourceName}")
-    public ResponseEntity<?> getResourceByResourceName(@PathVariable String resourceName){
-        try{
-            Optional<ResourceEntity> resource = resourceService.getResourceByResourceName(resourceName);
-            return ResponseEntity.status(HttpStatus.OK).body(resource);
-        }
-        catch (ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @PutMapping("/{resourceId}")
+    public ResponseEntity<ResourceEntity> updateResource(@PathVariable Long resourceId, @RequestBody ResourceEntity updatedResource, HttpServletRequest request, HttpServletResponse response) {
+        ResourceEntity updatedResourceEntity = resourceService.updateResource(resourceId, updatedResource);
+        return new ResponseEntity<>(updatedResourceEntity, HttpStatus.OK);
     }
 
-    @PostMapping("/createResource")
-    public ResponseEntity<?> createResource(@RequestBody ResourceEntity resource){
-        String createResourceResult = resourceService.createResource(resource);
-        return ResponseEntity.status(HttpStatus.OK).body(createResourceResult);
+    @GetMapping("/{resourceId}")
+    public ResponseEntity<ResourceEntity> getResourceById(@PathVariable Long resourceId, HttpServletRequest request, HttpServletResponse response) {
+        Optional<ResourceEntity> resource = resourceService.getResourceById(resourceId);
+        return resource.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PutMapping("/updateResource/{id}")
-    public ResponseEntity<?> updateResource(@PathVariable Long id, @RequestBody ResourceEntity resource){
-        try{
-            String updatedResourceResult = resourceService.updateResource(id, resource);
-            return ResponseEntity.status(HttpStatus.OK).body(updatedResourceResult);
-        }
-        catch(ResourceNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    @GetMapping
+    public ResponseEntity<List<ResourceEntity>> getAllResources(HttpServletRequest request, HttpServletResponse response) {
+        List<ResourceEntity> resources = resourceService.getAllResources();
+        return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{resourceId}")
+    public ResponseEntity<Void> deleteResource(@PathVariable Long resourceId, HttpServletRequest request, HttpServletResponse response) {
+        resourceService.deleteResource(resourceId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

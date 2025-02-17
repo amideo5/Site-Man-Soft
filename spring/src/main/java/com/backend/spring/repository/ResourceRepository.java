@@ -12,6 +12,6 @@ public interface ResourceRepository extends CrudRepository<ResourceEntity, Long>
 
     List<ResourceEntity> findAll();
 
-    Optional<ResourceEntity> findByResourceName(String resourceName);
+
 
 }

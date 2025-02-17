@@ -1,18 +1,22 @@
 package com.backend.spring.models;
 
-import com.backend.spring.enums.UserType;
+import com.backend.spring.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Setter
+/**
+ * Represents a user in the system, tied to a tenant.
+ */
 @Getter
+@Setter
 @Entity
 @Table(name = "users")
 public class UserEntity {
-    // Getters and Setters
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -23,12 +27,23 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private String designation;
+
+    @Column(nullable = false)
+    private String team;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserType userType;
+    private UserRole role;
 
     @Column(nullable = false)
     private Boolean enabled;
+
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "tenant_id", referencedColumnName = "id", nullable = false)
+    private TenantEntity tenant;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

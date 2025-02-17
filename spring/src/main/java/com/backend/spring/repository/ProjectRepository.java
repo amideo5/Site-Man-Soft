@@ -11,8 +11,6 @@ public interface ProjectRepository extends CrudRepository<ProjectEntity, Long> {
 
     List<ProjectEntity> findAll();
 
-    ProjectEntity findByProjectName(String projectName);
-
     ProjectEntity save(ProjectEntity projectEntity);
 
 }

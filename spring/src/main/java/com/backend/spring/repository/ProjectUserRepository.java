@@ -15,4 +15,8 @@ public interface ProjectUserRepository extends CrudRepository<ProjectUserEntity,
 
     ProjectUserEntity save(ProjectUserEntity projectUserEntity);
 
+    List<ProjectUserEntity> findByProjectId(Long projectId);
+
+    List<ProjectUserEntity> findByUserId(Long userId);
+
 }
