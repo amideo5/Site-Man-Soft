@@ -92,7 +92,7 @@ export function Layout() {
         <aside
           className={`
             fixed lg:static inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 shadow-sm
-            transition-all duration-300 ease-in-out h-[calc(100vh-57px)] overflow-y-auto
+            transition-all duration-300 ease-in-out h-[calc(100vh-px)] overflow-y-auto
             ${isMobileSidebarOpen ? "w-64" : "w-0 lg:w-16"}  
             ${isSidebarExpanded ? "lg:w-64" : "lg:w-16"}
           `}

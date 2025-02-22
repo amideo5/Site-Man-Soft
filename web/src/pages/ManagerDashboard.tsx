@@ -1,26 +1,48 @@
-import React from 'react';
-import DashboardCard from '../components/DashboardCard';
-import { Users, FolderOpen, Inbox, ClipboardList } from 'lucide-react';
+import { useState, useEffect } from "react";
+import DashboardCard from "../components/DashboardCard";
+import { Clock, FileText, Users, ClipboardList, Inbox } from "lucide-react";
+import TeamOverview from "../components/manager/TeamOverview";
+import TaskManager from "../components/manager/TaskManager";
+import ProjectOverview from "../components/manager/ProjectOverview";
+import ResourceApprovals from "../components/manager/ResourceApprovals";
+import SupportTickets from "../components/manager/SupportTickets";
+import Reports from "../components/manager/Reports";
+import Notifications from "../components/manager/Notifications";
 
 const ManagerDashboard = () => {
+  // State variables for aggregated data
+  const [totalTrackedHours, setTotalTrackedHours] = useState("0h 0m");
+  const [teamTasks, setTeamTasks] = useState(0);
+  const [allocatedResources, setAllocatedResources] = useState(0);
+  const [openSupportTickets, setOpenSupportTickets] = useState(0);
+
   return (
-    <div className="dark:bg-gray-800 space-y-6">
-      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Manager Dashboard</h2>
+    <div className="dark:bg-gray-800 space-y-6 p-4 sm:p-6 bg-gray-50 min-h-screen">
+      {/* Team Overview */}
+      <TeamOverview />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <DashboardCard title="Team Members" icon={Users} value="12" />
-        <DashboardCard title="Active Projects" icon={FolderOpen} value="4" />
-        <DashboardCard title="Pending Approvals" icon={Inbox} value="7" />
-        <DashboardCard title="Task Delegation" icon={ClipboardList} value="15 tasks assigned" />
+      {/* Dashboard Cards with Summary Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* <DashboardCard title="Total Time Tracked" icon={Clock} value={totalTrackedHours} /> */}
+        <DashboardCard title="Active Team Tasks" icon={FileText} value={teamTasks} />
+        <DashboardCard title="Resource Requests" icon={Inbox} value={allocatedResources} />
+        <DashboardCard title="Open Support Tickets" icon={ClipboardList} value={openSupportTickets} />
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-        <h3 className="text-lg font-semibold mb-4">Team Performance</h3>
-        <p className="text-sm text-gray-600">Overall productivity is at 85% this week.</p>
-        <button className="mt-2 w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700">
-          View Reports
-        </button>
+      {/* Main Dashboard Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TaskManager setTeamTasks={setTeamTasks} />
+        <ProjectOverview />
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ResourceApprovals setAllocatedResources={setAllocatedResources} />
+        <SupportTickets setOpenSupportTickets={setOpenSupportTickets} />
+      </div>
+
+      {/* Additional Sections */}
+      <Reports />
+      <Notifications />
     </div>
   );
 };

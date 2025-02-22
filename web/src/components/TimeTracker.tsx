@@ -1,60 +1,108 @@
 import React, { useState, useEffect } from "react";
 import type { Timeout } from "node:timers";
 
-const TimeTracker = () => {
+interface TimeTrackerProps {
+  setTimeTracked: (time: string) => void;
+}
+
+const TimeTracker: React.FC<TimeTrackerProps> = ({ setTimeTracked }) => {
   const [tracking, setTracking] = useState(false);
   const [clockInTime, setClockInTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [dailyTime, setDailyTime] = useState<number>(0); // in seconds
 
-  // Effect to get and set the username from localStorage when component mounts.
+  // Helper to format seconds into "xh ym zs"
+  const formatElapsedTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours}h ${minutes}m ${secs}s`;
+  };
+
+  // Load username from localStorage on mount
   useEffect(() => {
     const userDetailsStr = localStorage.getItem("userDetails");
     if (userDetailsStr) {
-      const { id, username } = JSON.parse(userDetailsStr);
+      const { username } = JSON.parse(userDetailsStr);
       setUsername(username);
     }
   }, []);
 
-  // Effect to check for saved tracking info when username becomes available.
+  // Load the accumulated daily time when username becomes available.
+  useEffect(() => {
+    if (username) {
+      const todayDate = new Date().toISOString().split("T")[0];
+      const storedDailyTime = localStorage.getItem(`dailyTime_${username}_${todayDate}`);
+      if (storedDailyTime) {
+        setDailyTime(parseInt(storedDailyTime));
+      } else {
+        setDailyTime(0);
+      }
+      // Update the dashboard (if not currently tracking)
+      if (!tracking) {
+        setTimeTracked(formatElapsedTime(parseInt(storedDailyTime || "0")));
+      }
+    }
+  }, [username, tracking, setTimeTracked]);
+
+  // Check for saved tracking info. If the stored record is from a previous day, auto clock-out.
   useEffect(() => {
     if (!username) return;
     const storedTrackingInfo = localStorage.getItem(`tracking_${username}`);
     if (storedTrackingInfo) {
       const { clockInTime: storedClockIn, date: storedDate } = JSON.parse(storedTrackingInfo);
-      const storedClockInTime = new Date(storedClockIn);
       const todayDate = new Date().toISOString().split("T")[0];
-
       if (storedDate !== todayDate) {
-        // Auto clock-out if the stored date is not today.
-        console.log("Auto clocking out due to date change...");
+        // Auto clock-out for a previous day's session.
+        const storedClockInDate = new Date(storedClockIn);
+        // Calculate midnight (12 AM) for the stored day.
+        const midnight = new Date(storedClockInDate);
+        midnight.setHours(24, 0, 0, 0);
+        const sessionSeconds = Math.floor((midnight.getTime() - storedClockInDate.getTime()) / 1000);
+        // Update the daily total for the stored day.
+        const prevDailyTime = parseInt(localStorage.getItem(`dailyTime_${username}_${storedDate}`) || "0");
+        const newDailyTime = prevDailyTime + sessionSeconds;
+        localStorage.setItem(`dailyTime_${username}_${storedDate}`, newDailyTime.toString());
+        console.log(
+          `Auto clocked out previous session on ${storedDate} at midnight with duration: ${sessionSeconds} seconds.`
+        );
+        // Clear the stale tracking info.
         localStorage.removeItem(`tracking_${username}`);
       } else {
-        setClockInTime(storedClockInTime);
+        // If the stored record is from today, resume tracking.
+        const clockInDate = new Date(storedClockIn);
+        setClockInTime(clockInDate);
         setTracking(true);
-        setElapsedTime(Math.floor((Date.now() - storedClockInTime.getTime()) / 1000));
+        setElapsedTime(Math.floor((Date.now() - clockInDate.getTime()) / 1000));
       }
     }
   }, [username]);
 
-  // Effect to update the elapsed time every second if tracking.
+  // Update elapsed time (and dashboard total) every second when tracking.
   useEffect(() => {
     let interval: Timeout | null = null;
     if (tracking && clockInTime) {
       interval = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - clockInTime.getTime()) / 1000));
+        const sessionSeconds = Math.floor((Date.now() - clockInTime.getTime()) / 1000);
+        setElapsedTime(sessionSeconds);
+        // Total time = previous sessions (dailyTime) + current session time
+        const totalSeconds = dailyTime + sessionSeconds;
+        setTimeTracked(formatElapsedTime(totalSeconds));
       }, 1000);
     } else {
+      // If not tracking, display only the stored daily total.
+      setTimeTracked(formatElapsedTime(dailyTime));
       setElapsedTime(0);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [tracking, clockInTime]);
+  }, [tracking, clockInTime, dailyTime, setTimeTracked]);
 
-  // Effect to clear error messages after 3 seconds.
+  // Clear error messages after 3 seconds.
   useEffect(() => {
     if (errorMessage) {
       const timer = setTimeout(() => setErrorMessage(null), 3000);
@@ -62,7 +110,7 @@ const TimeTracker = () => {
     }
   }, [errorMessage]);
 
-  // Effect to auto clock-out at midnight if tracking.
+  // Auto clock-out at midnight if tracking (only works if the tab remains open).
   useEffect(() => {
     let autoClockOutTimeout: Timeout | null = null;
     if (tracking && clockInTime) {
@@ -70,20 +118,18 @@ const TimeTracker = () => {
       const midnight = new Date(now);
       midnight.setHours(24, 0, 0, 0);
       const timeUntilMidnight = midnight.getTime() - now.getTime();
-
       console.log(`Auto clock-out scheduled in ${timeUntilMidnight / 1000} seconds`);
-
       autoClockOutTimeout = setTimeout(() => {
         console.log("Auto clocking out at midnight...");
         handleClockOut();
       }, timeUntilMidnight);
     }
-
     return () => {
       if (autoClockOutTimeout) clearTimeout(autoClockOutTimeout);
     };
   }, [tracking, clockInTime]);
 
+  // Fetch the current location using the browser's geolocation.
   const fetchLocation = (): Promise<{ lat: number; lon: number }> => {
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
@@ -149,6 +195,7 @@ const TimeTracker = () => {
       setClockInTime(now);
       setLocation(location);
 
+      // Save tracking info (with today's date) so it persists on reload.
       localStorage.setItem(
         `tracking_${username}`,
         JSON.stringify({ clockInTime: now.toISOString(), date: todayDate, userId })
@@ -191,6 +238,15 @@ const TimeTracker = () => {
         throw new Error(errorMsg);
       }
 
+      if (clockInTime) {
+        // Calculate seconds elapsed for this session.
+        const sessionSeconds = Math.floor((Date.now() - clockInTime.getTime()) / 1000);
+        const todayDate = new Date().toISOString().split("T")[0];
+        const newDailyTime = dailyTime + sessionSeconds;
+        setDailyTime(newDailyTime);
+        localStorage.setItem(`dailyTime_${username}_${todayDate}`, newDailyTime.toString());
+      }
+
       setTracking(false);
       setClockInTime(null);
       setElapsedTime(0);
@@ -209,13 +265,6 @@ const TimeTracker = () => {
     } else {
       handleClockIn();
     }
-  };
-
-  const formatElapsedTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours}h ${minutes}m ${secs}s`;
   };
 
   return (

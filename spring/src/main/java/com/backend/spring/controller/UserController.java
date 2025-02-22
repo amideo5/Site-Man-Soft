@@ -83,4 +83,9 @@ public class UserController {
         Optional<UserEntity> user = userService.getUserByUserName(username);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
+    @GetMapping("/manager/{managerId}/employees")
+    public List<UserEntity> getEmployeesUnderManager(@PathVariable Long managerId) {
+        return userService.getEmployeesUnderManager(managerId);
+    }
 }

@@ -60,4 +60,6 @@ public interface UserService {
      * @return an Optional containing the UserEntity if found, otherwise empty
      */
     Optional<UserEntity> getUserByUserName(String username);
+
+    List<UserEntity> getEmployeesUnderManager(Long managerId);
 }

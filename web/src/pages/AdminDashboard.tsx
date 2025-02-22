@@ -1,4 +1,3 @@
-import React from 'react';
 import DashboardCard from '../components/DashboardCard';
 import { Users, Database, BarChart2, Server } from 'lucide-react';
 

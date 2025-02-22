@@ -17,7 +17,7 @@ public class JwtTokenProvider {
     private SecretKey secretKey;  // Store as a SecretKey object
 
     // Token validity in milliseconds (e.g., 1 hour)
-    @Value("${security.jwt.token.expire-length:86400000}")
+    @Value("${security.jwt.token.expire-length:604800000}")
     private long validityInMilliseconds;
 
     @Value("${security.jwt.token.secret-key}") // Read from application.properties

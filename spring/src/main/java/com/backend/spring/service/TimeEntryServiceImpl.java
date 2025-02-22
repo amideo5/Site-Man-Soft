@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -65,5 +66,9 @@ public class TimeEntryServiceImpl implements TimeEntryService{
         // Update the clock-out time
         timeEntry.setClockOutTime(LocalDateTime.now());
         return timeEntryRepository.save(timeEntry);
+    }
+
+    public List<TimeEntryEntity> getTimeEntriesByUserId(Long userId) {
+        return timeEntryRepository.findByUserId(userId);
     }
 }

@@ -7,7 +7,7 @@ interface Task {
   status: string;
 }
 
-const TaskList = () => {
+const TaskList = ({ setActiveTasks }: { setActiveTasks: (count: number) => void }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -15,20 +15,25 @@ const TaskList = () => {
   const [userDetails, setUserDetails] = useState<{ id: number } | null>(null);
   const tasksPerPage = 3;
 
-  // 🔄 Poll localStorage every 1 second until userDetails is available
+  // 🔄 Fetch userDetails from localStorage
   useEffect(() => {
-    const interval = setInterval(() => {
-      const userDetailsString = localStorage.getItem("userDetails");
-      if (userDetailsString) {
-        setUserDetails(JSON.parse(userDetailsString));
-        clearInterval(interval); // 🛑 Stop polling once data is found
-      }
-    }, 1000); // Polling interval: 1 second
+    const userDetailsString = localStorage.getItem("userDetails");
+    if (userDetailsString) {
+      setUserDetails(JSON.parse(userDetailsString));
+    } else {
+      const interval = setInterval(() => {
+        const storedUser = localStorage.getItem("userDetails");
+        if (storedUser) {
+          setUserDetails(JSON.parse(storedUser));
+          clearInterval(interval); // ✅ Stop polling
+        }
+      }, 1000);
 
-    return () => clearInterval(interval); // Cleanup interval on unmount
+      return () => clearInterval(interval);
+    }
   }, []);
 
-  // Fetch tasks once userDetails is available
+  // 🚀 Fetch tasks when userDetails is available
   useEffect(() => {
     if (!userDetails) return;
 
@@ -49,9 +54,7 @@ const TaskList = () => {
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch tasks");
-        }
+        if (!response.ok) throw new Error("Failed to fetch tasks");
 
         const data = await response.json();
         const formattedTasks: Task[] = data.map((task: any) => ({
@@ -61,6 +64,10 @@ const TaskList = () => {
         }));
 
         setTasks(formattedTasks);
+
+        // ✅ Update active tasks count in the dashboard
+        const activeCount = formattedTasks.filter((task) => task.status === "Pending").length;
+        setActiveTasks(activeCount);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unknown error occurred");
       } finally {
@@ -69,8 +76,9 @@ const TaskList = () => {
     };
 
     fetchTasks();
-  }, [userDetails]); // ✅ Fetch tasks when userDetails becomes available
+  }, [userDetails, setActiveTasks]); // ✅ Depend on `userDetails` and `setActiveTasks`
 
+  // ✅ Pagination logic
   const pageCount = Math.ceil(tasks.length / tasksPerPage);
   const currentTasks = tasks.slice(currentPage * tasksPerPage, (currentPage + 1) * tasksPerPage);
 

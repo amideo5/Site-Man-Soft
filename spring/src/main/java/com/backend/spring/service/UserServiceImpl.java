@@ -115,4 +115,11 @@ public class UserServiceImpl implements UserService {
     public Optional<UserEntity> getUserByUserName(String username) {
         return userRepository.findByUsername(username);
     }
+
+    @Override
+    public List<UserEntity> getEmployeesUnderManager(Long managerId) {
+        UserEntity manager = userRepository.findById(managerId)
+                .orElseThrow(() -> new RuntimeException("Manager not found"));
+        return userRepository.findByManager(manager);
+    }
 }

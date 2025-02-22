@@ -8,26 +8,31 @@ interface Resource {
   allocatedQuantity: number;
 }
 
-const ResourceList = () => {
+const ResourceList = ({ setResourceRequests }: { setResourceRequests: (count: number) => void }) => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userDetails, setUserDetails] = useState<{ id: number } | null>(null);
 
-  // 🔄 Poll localStorage every 1 second until userDetails is available
+  // 🔄 Fetch userDetails from localStorage (checks every 1s)
   useEffect(() => {
-    const interval = setInterval(() => {
-      const userDetailsString = localStorage.getItem("userDetails");
-      if (userDetailsString) {
-        setUserDetails(JSON.parse(userDetailsString));
-        clearInterval(interval); // 🛑 Stop polling once data is found
-      }
-    }, 1000);
+    const userDetailsString = localStorage.getItem("userDetails");
+    if (userDetailsString) {
+      setUserDetails(JSON.parse(userDetailsString));
+    } else {
+      const interval = setInterval(() => {
+        const storedUser = localStorage.getItem("userDetails");
+        if (storedUser) {
+          setUserDetails(JSON.parse(storedUser));
+          clearInterval(interval); // ✅ Stop polling once found
+        }
+      }, 1000);
 
-    return () => clearInterval(interval); // Cleanup interval on unmount
+      return () => clearInterval(interval); // Cleanup
+    }
   }, []);
 
-  // Fetch resources once userDetails is available
+  // 🚀 Fetch resources when userDetails is available
   useEffect(() => {
     if (!userDetails) return;
 
@@ -48,20 +53,19 @@ const ResourceList = () => {
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch resources");
-        }
+        if (!response.ok) throw new Error("Failed to fetch resources");
 
         const data = await response.json();
         const formattedResources: Resource[] = data.map((resource: any) => ({
           id: resource.id,
-          name: resource.resourceName, // ✅ Correctly mapping resource name
+          name: resource.resourceName,
           allocatedAt: new Date(resource.allocatedAt).toLocaleDateString(),
           returnDate: new Date(resource.returnDate).toLocaleDateString(),
-          allocatedQuantity: resource.allocatedQuantity, // ✅ Including allocatedQuantity
+          allocatedQuantity: resource.allocatedQuantity,
         }));
 
         setResources(formattedResources);
+        setResourceRequests(formattedResources.length); // ✅ Update dashboard count
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unknown error occurred");
       } finally {
@@ -70,7 +74,7 @@ const ResourceList = () => {
     };
 
     fetchResources();
-  }, [userDetails]);
+  }, [userDetails, setResourceRequests]); // ✅ Includes setResourceRequests in dependencies
 
   if (loading) return <div>Loading resources...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
@@ -83,9 +87,7 @@ const ResourceList = () => {
           resources.map((resource) => (
             <li key={resource.id} className="border-b py-2 flex justify-between">
               <span className="font-medium">{resource.name}</span>
-              <span className="text-gray-500">
-                Quantity: {resource.allocatedQuantity}
-              </span>
+              <span className="text-gray-500">Quantity: {resource.allocatedQuantity}</span>
             </li>
           ))
         ) : (

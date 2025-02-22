@@ -2,55 +2,58 @@ import { useEffect, useState } from "react";
 
 const API_URL = `${import.meta.env.VITE_BASE_URL}/api/support-tickets`;
 
-const SupportTickets = () => {
+const SupportTickets = ({ setSupportTickets }: { setSupportTickets: (count: number) => void }) => {
   const [tickets, setTickets] = useState([]);
-  const [newTicket, setNewTicket] = useState("");
-  const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState<number | null>(null);
 
-  // Poll localStorage for user details
+  // 🔄 Fetch userDetails from localStorage
   useEffect(() => {
-    const interval = setInterval(() => {
-      const userDetailsString = localStorage.getItem("userDetails");
-      if (userDetailsString) {
-        const user = JSON.parse(userDetailsString);
-        setUserId(user.id);
-        clearInterval(interval); // Stop polling once user ID is available
-      }
-    }, 500); // Poll every 500ms
-
-    return () => clearInterval(interval); // Cleanup on unmount
+    const userDetailsString = localStorage.getItem("userDetails");
+    if (userDetailsString) {
+      setUserId(JSON.parse(userDetailsString).id);
+    } else {
+      const interval = setInterval(() => {
+        const storedUser = localStorage.getItem("userDetails");
+        if (storedUser) {
+          setUserId(JSON.parse(storedUser).id);
+          clearInterval(interval); // ✅ Stop polling once found
+        }
+      }, 500);
+      return () => clearInterval(interval); // Cleanup
+    }
   }, []);
 
-  // Fetch tickets once userId is available
+  // 🚀 Fetch support tickets when userId is available
   useEffect(() => {
     if (!userId) return;
     const token: string = localStorage.getItem("authToken") ?? "";
 
     const fetchTickets = async () => {
       try {
-        const response = await fetch(
-          API_URL,
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const data = await response.json();
+        const response = await fetch(API_URL, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-        // Filter tickets belonging to the current user
-        const userTickets = data.filter(ticket => ticket.user.id === userId);
+        if (!response.ok) throw new Error("Failed to fetch support tickets");
+
+        const data = await response.json();
+        const userTickets = data.filter((ticket: any) => ticket.user.id === userId);
         setTickets(userTickets);
+
+        // ✅ Update dashboard ticket count
+        setSupportTickets(userTickets.length);
       } catch (error) {
         console.error("Error fetching tickets:", error);
       }
     };
 
     fetchTickets();
-  }, [userId]);
+  }, [userId, setSupportTickets]); // ✅ Updates count when tickets change
 
   return (
     <div className="dark:bg-gray-800 bg-white p-6 rounded-lg shadow-sm">
